@@ -2,7 +2,7 @@ import {
     DateComponent,
     ReplacementConverter,
     ReplacementFormatter, unicodeFormatter, unicodeParser,
-    YSDSDate,
+    YSDSDate, YSDSDateDiff, YSDSDateDiffResult,
 } from "../src/date";
 
 describe('YSDSDate tests', () => {
@@ -369,5 +369,20 @@ describe('YSDSDateDiff tests', () => {
         const b = new YSDSDate(2019, 1, 1, 0, 0, 0)
 
         expect(a.diff(b).toString()).toBe('2w 2min ago')
+    })
+
+    it('should calculate the result correctly', () => {
+        const a = new YSDSDate(2019, 1, 16, 3, 2, 1);
+        const b = new YSDSDate(2019, 1, 1, 0, 0, 0);
+        const c = new YSDSDate(2019, 1, 1, 0, 0, 0);
+
+        let diff = new YSDSDateDiff(a, b);
+        expect(diff.result).toBe(YSDSDateDiffResult.FirstArgumentOccursAfterSecondArgument);
+
+        diff = new YSDSDateDiff(b, a);
+        expect(diff.result).toBe(YSDSDateDiffResult.FirstArgumentOccursBeforeSecondArgument);
+
+        diff = new YSDSDateDiff(b, c);
+        expect(diff.result).toBe(YSDSDateDiffResult.Equal);
     })
 })

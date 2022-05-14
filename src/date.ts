@@ -191,10 +191,18 @@ export class YSDSDate {
     }
 }
 
+export enum YSDSDateDiffResult {
+    Equal = 0,
+    FirstArgumentOccursBeforeSecondArgument,
+    FirstArgumentOccursAfterSecondArgument,
+}
+
 export class YSDSDateDiff {
-    public readonly now: YSDSDate
-    public readonly comparison: YSDSDate
+    public readonly first: YSDSDate
+    public readonly second: YSDSDate
     public readonly delta: number
+    public readonly result: YSDSDateDiffResult
+
     public get weeks(): number {
         return Math.floor(Math.abs(this.delta) / 604_800)
     }
@@ -211,10 +219,18 @@ export class YSDSDateDiff {
         return this.delta < 0
     }
 
-    constructor(now: YSDSDate, comparison: YSDSDate) {
-        this.now = now
-        this.comparison = comparison
-        this.delta = this.now.timestamp - this.comparison.timestamp
+    constructor(first: YSDSDate, second: YSDSDate) {
+        this.first = first;
+        this.second = second;
+        this.delta = this.first.timestamp - this.second.timestamp;
+
+        if (this.delta === 0) {
+            this.result = YSDSDateDiffResult.Equal;
+        } else if (this.delta < 0) {
+            this.result = YSDSDateDiffResult.FirstArgumentOccursBeforeSecondArgument;
+        } else {
+            this.result = YSDSDateDiffResult.FirstArgumentOccursAfterSecondArgument;
+        }
     }
 
     public toString(): string {
