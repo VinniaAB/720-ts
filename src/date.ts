@@ -38,7 +38,7 @@ const getterMap = {
     [DateComponent.Minute]: Date.prototype.getMinutes,
     [DateComponent.Second]: Date.prototype.getSeconds,
     [DateComponent.Millisecond]: Date.prototype.getMilliseconds,
-}
+};
 
 const setterMap = {
     [DateComponent.Year]: Date.prototype.setFullYear,
@@ -61,7 +61,7 @@ const setterMap = {
     [DateComponent.Minute]: Date.prototype.setMinutes,
     [DateComponent.Second]: Date.prototype.setSeconds,
     [DateComponent.Millisecond]: Date.prototype.setMilliseconds,
-}
+};
 
 export class YSDSDate {
 
@@ -186,6 +186,13 @@ export class YSDSDate {
         return unicodeFormatter.format(this, format)
     }
 
+    /**
+     * Returns a diff between this date and some other moment in time.
+     * The result will be marked 'isFuture' if the other date occurred
+     * later than this instance.
+     *
+     * @see YSDSDateDiff.isFuture
+     */
     public diff(other: YSDSDate): YSDSDateDiff {
         return new YSDSDateDiff(this, other)
     }
@@ -203,20 +210,43 @@ export class YSDSDateDiff {
     public readonly delta: number
     public readonly result: YSDSDateDiffResult
 
+    /**
+     * Returns the number of weeks between 'first' and 'second'.
+     * The result is always a positive number.
+     */
     public get weeks(): number {
         return Math.floor(Math.abs(this.delta) / 604_800)
     }
+
+    /**
+     * Returns the number of days between 'first' and 'second'.
+     * The result is always a positive number.
+     */
     public get days(): number {
-        return Math.floor((Math.abs(this.delta) / 86_400) % 7)
+        return Math.floor(Math.abs(this.delta) / 86_400);
     }
+
+    /**
+     * Returns the number of hours between 'first' and 'second'.
+     * The result is always a positive number.
+     */
     public get hours(): number {
         return Math.floor((Math.abs(this.delta) / 3_600) % 24)
     }
+
+    /**
+     * Returns the number of minutes between 'first' and 'second'.
+     * The result is always a positive number.
+     */
     public get minutes(): number {
         return Math.floor((Math.abs(this.delta) / 60) % 60)
     }
+
+    /**
+     * Returns true if 'second' is a later moment in time than 'first'.
+     */
     public get isFuture(): boolean {
-        return this.delta < 0
+        return this.delta < 0;
     }
 
     constructor(first: YSDSDate, second: YSDSDate) {
@@ -241,7 +271,7 @@ export class YSDSDateDiff {
 
         const components: ReadonlyArray<[string, number]> = [
             ['w', this.weeks],
-            ['d', this.days],
+            ['d', this.days % 7],
             ['h', this.hours],
             ['min', this.minutes],
         ]

@@ -333,43 +333,93 @@ describe('unicodeFormatter tests', () => {
 })
 
 describe('YSDSDateDiff tests', () => {
-    const cases: ReadonlyArray<[YSDSDate, YSDSDate, boolean, number, number, number, number]> = [
-        [new YSDSDate(2019, 1, 1, 0), new YSDSDate(2019, 1, 1, 1), true, 0, 0, 1, 0],
-        [new YSDSDate(2019, 1, 1, 1), new YSDSDate(2019, 1, 1, 0), false, 0, 0, 1, 0],
-        [new YSDSDate(2019, 1, 2, 1), new YSDSDate(2019, 1, 1, 0), false, 0, 1, 1, 0],
-        [new YSDSDate(2019, 1, 2, 5, 2), new YSDSDate(2019, 1, 1, 0, 0, 0), false, 0, 1, 5, 2],
-        [new YSDSDate(2019, 1, 8), new YSDSDate(2019, 1, 1), false, 1, 0, 0, 0],
-    ]
+    type DiffTest = {
+        first: YSDSDate
+        second: YSDSDate
+        is_future: boolean
+        weeks: number
+        days: number
+        hours: number
+        minutes: number
+    };
 
-    let i = 0
+    const cases: ReadonlyArray<DiffTest> = [
+        {
+            first: new YSDSDate(2019, 1, 1, 0),
+            second: new YSDSDate(2019, 1, 1, 1),
+            is_future: true,
+            weeks: 0,
+            days: 0,
+            hours: 1,
+            minutes: 0,
+        },
+        {
+            first: new YSDSDate(2019, 1, 1, 1),
+            second: new YSDSDate(2019, 1, 1, 0),
+            is_future: false,
+            weeks: 0,
+            days: 0,
+            hours: 1,
+            minutes: 0,
+        },
+        {
+            first: new YSDSDate(2019, 1, 2, 1),
+            second: new YSDSDate(2019, 1, 1, 0),
+            is_future: false,
+            weeks: 0,
+            days: 1,
+            hours: 1,
+            minutes: 0,
+        },
+        {
+            first: new YSDSDate(2019, 1, 2, 5, 2),
+            second: new YSDSDate(2019, 1, 1, 0, 0, 0),
+            is_future: false,
+            weeks: 0,
+            days: 1,
+            hours: 5,
+            minutes: 2,
+        },
+        {
+            first: new YSDSDate(2019, 1, 8),
+            second: new YSDSDate(2019, 1, 1),
+            is_future: false,
+            weeks: 1,
+            days: 7,
+            hours: 0,
+            minutes: 0,
+        },
+    ];
+
+    let i: number = 0;
 
     for (const test of cases) {
         it(`should diff correctly ${i}`, () => {
-            const diff = test[0].diff(test[1])
+            const diff = test.first.diff(test.second);
 
-            expect(diff.isFuture).toBe(test[2])
-            expect(diff.weeks).toBe(test[3])
-            expect(diff.days).toBe(test[4])
-            expect(diff.hours).toBe(test[5])
-            expect(diff.minutes).toBe(test[6])
-        })
-        ++i
+            expect(diff.isFuture).toBe(test.is_future);
+            expect(diff.weeks).toBe(test.weeks);
+            expect(diff.days).toBe(test.days);
+            expect(diff.hours).toBe(test.hours);
+            expect(diff.minutes).toBe(test.minutes);
+        });
+        ++i;
     }
 
     it('should stringify correctly', () => {
-        const a = new YSDSDate(2019, 1, 16, 3, 2, 1)
-        const b = new YSDSDate(2019, 1, 1, 0, 0, 0)
+        const a = new YSDSDate(2019, 1, 16, 3, 2, 1);
+        const b = new YSDSDate(2019, 1, 1, 0, 0, 0);
 
-        expect(a.diff(b).toString()).toBe('2w 1d 3h 2min ago')
-        expect(b.diff(a).toString()).toBe('In 2w 1d 3h 2min')
-    })
+        expect(a.diff(b).toString()).toBe('2w 1d 3h 2min ago');
+        expect(b.diff(a).toString()).toBe('In 2w 1d 3h 2min');
+    });
 
     it('should skip empty parts when stringifying', () => {
-        const a = new YSDSDate(2019, 1, 15, 0, 2, 0)
-        const b = new YSDSDate(2019, 1, 1, 0, 0, 0)
+        const a = new YSDSDate(2019, 1, 15, 0, 2, 0);
+        const b = new YSDSDate(2019, 1, 1, 0, 0, 0);
 
-        expect(a.diff(b).toString()).toBe('2w 2min ago')
-    })
+        expect(a.diff(b).toString()).toBe('2w 2min ago');
+    });
 
     it('should calculate the result correctly', () => {
         const a = new YSDSDate(2019, 1, 16, 3, 2, 1);
@@ -384,5 +434,13 @@ describe('YSDSDateDiff tests', () => {
 
         diff = new YSDSDateDiff(b, c);
         expect(diff.result).toBe(YSDSDateDiffResult.Equal);
-    })
+    });
+
+    it('should return the absolute number of days elapsed (when over a week)', () => {
+        const a = new YSDSDate(2023, 2, 10);
+        const b = new YSDSDate(2023, 2, 21);
+        const diff = b.diff(a);
+
+        expect(diff.days).toBe(11);
+    });
 })
