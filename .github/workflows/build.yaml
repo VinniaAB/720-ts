@@ -5,18 +5,18 @@ env:
   NODE_OPTIONS: --max-old-space-size=4096
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Lint
         run: npm run lint
       - name: Test
-        run: npm run test -- --no-cache --reporters=jest-junit --reporters=default
+        run: npm run test -- --no-cache --reporters=jest-junit --reporters=default --verbose
