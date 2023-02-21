@@ -1,33 +1,20 @@
-import {StringLike} from "./types"
-
-export function objectContains(object: object, needle: string): boolean {
-    needle = needle.toLowerCase()
-
-    const stack: Array<object> = [object]
-    let part: object | undefined
-
-    while (typeof (part = stack.shift()) !== 'undefined') {
-        for (const key of Object.keys(part)) {
-            const value: unknown = (part as any)[key]
-
-            if (value === null) {
-                continue
-            }
-
-            switch (typeof value) {
-                case 'undefined':
-                case 'function':
-                    continue
-                case 'object':
-                    stack.push(value!)
-                    continue
-            }
-
-            if ((value as StringLike).toString().toLowerCase().indexOf(needle) !== -1) {
-                return true
-            }
-        }
+export function objectContains<T>(value: T, needle: string): boolean {
+    if (value === null) {
+        return false;
     }
 
-    return false
+    switch (typeof value) {
+        case 'undefined':
+        case 'function':
+            return false;
+        case 'object':
+            for (const key in value) {
+                if (Object.prototype.hasOwnProperty.call(value, key) && objectContains(value[key], needle)) {
+                    return true;
+                }
+            }
+            break;
+    }
+
+    return String(value).toLowerCase().includes(needle.toLowerCase());
 }
